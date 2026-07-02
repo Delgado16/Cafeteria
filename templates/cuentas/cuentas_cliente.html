@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Cuentas del Cliente{% endblock %}
+
+{% block section_title %}Ficha de Deuda{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Cuentas por Cobrar - {{ cliente.nombre }}</h1>
+        <p class="text-muted">Estado de facturación consolidada e historial pendiente.</p>
+    </div>
+    <a href="/cuentas" class="btn btn-secondary">
+        <i data-lucide="arrow-left"></i> Volver a Cuentas
+    </a>
+</div>
+
+<div class="grid grid-3" style="margin-bottom: 2rem;">
+    <div class="card" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div>
+                <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Nombre Cliente</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">{{ cliente.nombre }}</div>
+            </div>
+            <div>
+                <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Cédula / Identificación</div>
+                <div style="font-weight: 600;"><code style="font-family: var(--font-mono);">{{ cliente.cedula }}</code></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-left: 4px solid var(--danger);">
+        <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">Deuda Consolidada</div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: var(--danger); letter-spacing: -0.025em; line-height: 1.2;">
+            C${{ "%.2f"|format(saldo_consolidado) }}
+        </div>
+        <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <a href="/cuentas/abonar/{{ cliente.id }}" class="btn btn-success btn-small" style="width: 100%;">
+                <i data-lucide="coins"></i> Registrar Abono
+            </a>
+            {% if saldo_consolidado > 0 %}
+            <a href="/cuentas/cancelar-todo/{{ cliente.id }}" class="btn btn-primary btn-small" style="width: 100%;" onclick="return confirm('¿Está seguro que desea registrar el pago de TODAS las cuentas pendientes de este cliente (Total: C${{ "%.2f"|format(saldo_consolidado) }})?');">
+                <i data-lucide="check-circle"></i> Cancelar Toda la Deuda
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="receipt" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Facturas Pendientes</h3>
+    </div>
+    <div class="card-body">
+        {% if cuentas %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Factura</th>
+                        <th>Fecha Emisión</th>
+                        <th>Monto Original</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cuenta in cuentas %}
+                    <tr>
+                        <td><strong>{{ cuenta.numero_factura }}</strong></td>
+                        <td>{{ cuenta.fecha_emision }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(cuenta.monto_original) }}</td>
+                        <td style="font-weight: 700; color: {% if cuenta.saldo_pendiente > 0 %}var(--danger){% else %}var(--success){% endif %};">
+                            C${{ "%.2f"|format(cuenta.saldo_pendiente) }}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if cuenta.estado == 'pagada' else 'warning' if cuenta.estado == 'abonada' else 'danger' }}">
+                                <i data-lucide="{% if cuenta.estado == 'pagada' %}check-circle{% elif cuenta.estado == 'abonada' %}clock{% else %}alert-circle{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ cuenta.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                {% if cuenta.estado != 'pagada' %}
+                                <a href="/cuentas/pagar/{{ cuenta.id }}" class="btn btn-success btn-small">
+                                    <i data-lucide="credit-card"></i> Pagar
+                                </a>
+                                {% endif %}
+                                <a href="/cuentas/historial-pagos/{{ cuenta.id }}" class="btn btn-secondary btn-small">
+                                    <i data-lucide="activity"></i> Historial
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="check-circle-2" style="width: 40px; height: 40px; color: var(--success); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">Este cliente no posee facturas con saldos pendientes.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

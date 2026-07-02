@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de Cuentas por Cobrar{% endblock %}
+
+{% block section_title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;">
+                <i data-lucide="landmark" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i>
+                Reporte de Cuentas por Cobrar
+            </h2>
+            <div class="btn-group">
+                <a href="/reportes/cuentas-por-cobrar/pdf" class="btn btn-secondary btn-small">
+                    <i data-lucide="file-text"></i> PDF
+                </a>
+                <a href="/reportes/cuentas-por-cobrar/excel" class="btn btn-success btn-small">
+                    <i data-lucide="file-spreadsheet"></i> Excel
+                </a>
+                <a href="/reportes" class="btn btn-secondary btn-small">
+                    <i data-lucide="arrow-left"></i> Atras
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="text-muted" style="margin-bottom: 1.5rem;">
+            <i data-lucide="calendar" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+            Generado el: {{ request.environ['REQUEST_TIME'] if request.environ.get('REQUEST_TIME') else 'Hoy' }}
+        </p>
+
+        {% if clientes %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Cliente</th>
+                        <th>Celular</th>
+                        <th style="text-align: right;">Saldo Pendiente</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td><code style="font-family: var(--font-mono);">{{ cliente.cedula }}</code></td>
+                        <td><strong>{{ cliente.nombre }}</strong></td>
+                        <td>{{ cliente.celular if cliente.celular else '-' }}</td>
+                        <td style="text-align: right; color: var(--danger); font-weight: 700;">
+                            C${{ "%.2f"|format(cliente.saldo) }}
+                        </td>
+                        <td style="text-align: center;">
+                            <a href="/cuentas/cancelar-todo/{{ cliente.id }}" class="btn btn-primary btn-small" onclick="return confirm('¿Está seguro que desea cancelar TODAS las deudas de {{ cliente.nombre }} por C${{ "%.2f"|format(cliente.saldo) }}?');" title="Cancelar Deuda">
+                                <i data-lucide="check-square"></i> Pagar Todo
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="background-color: var(--primary-light); font-weight: bold; border-top: 2px solid var(--border);">
+                        <td colspan="3" style="text-align: right; font-weight: 800;">TOTAL DE CARTERA POR COBRAR:</td>
+                        <td style="text-align: right; color: var(--primary); font-size: 1.15rem; font-weight: 800;">
+                            C${{ "%.2f"|format(total_general) }}
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="check-circle-2" style="width: 48px; height: 48px; color: var(--success); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No se registran clientes con saldos adeudados pendientes.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        if (this.getAttribute('href') && this.getAttribute('href').includes('pdf')) {
+            // Permite el comportamiento por defecto de descarga
+        }
+    });
+});
+</script>
+{% endblock %}

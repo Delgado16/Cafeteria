@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Pago{% endblock %}
+
+{% block section_title %}Cuentas por Cobrar{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="credit-card" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--success);"></i> Registrar Pago de Factura</h2>
+    </div>
+    <div class="card-body">
+        <div style="background-color: var(--primary-light); padding: 1.25rem; border-radius: var(--radius); margin-bottom: 1.5rem; border: 1px solid hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.08);">
+            <div style="margin-bottom: 0.5rem;"><strong class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Factura:</strong> <span style="font-weight: 700; color: var(--text-dark);">{{ cuenta.numero_factura }}</span></div>
+            <div style="margin-bottom: 0.5rem;"><strong class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Cliente:</strong> <span style="font-weight: 600;">{{ cuenta.cliente_nombre }}</span></div>
+            <div style="margin-bottom: 0.5rem;"><strong class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Monto Original:</strong> <span style="font-weight: 600;">C${{ "%.2f"|format(cuenta.monto_original) }}</span></div>
+            <div style="margin-bottom: 0.5rem;"><strong class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Saldo Pendiente Actual:</strong> <span style="color: var(--danger); font-weight: 800; font-size: 1.25rem;">C${{ "%.2f"|format(cuenta.saldo_pendiente) }}</span></div>
+        </div>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="monto">Monto a Pagar (C$)</label>
+                <input type="number" id="monto" name="monto" step="0.01" min="0.01" max="{{ cuenta.saldo_pendiente }}" required autofocus placeholder="0.00">
+                <small class="text-muted" style="display: block; margin-top: 0.25rem; font-size: 0.75rem;"><i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i> El monto no debe exceder el saldo pendiente de C${{ "%.2f"|format(cuenta.saldo_pendiente) }}</small>
+            </div>
+
+            <div class="form-group">
+                <label for="referencia">Referencia / No. Comprobante (Opcional)</label>
+                <input type="text" id="referencia" name="referencia" placeholder="Ej: Efectivo, Transf #102">
+            </div>
+
+            <div class="form-group">
+                <label for="observaciones">Observaciones (Opcional)</label>
+                <textarea id="observaciones" name="observaciones" placeholder="Escriba comentarios adicionales aquí..."></textarea>
+            </div>
+
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 1.5rem;">
+                <a href="/cuentas" class="btn btn-secondary">
+                    <i data-lucide="x"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i data-lucide="check"></i> Registrar Pago
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

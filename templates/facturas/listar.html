@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Facturas{% endblock %}
+
+{% block section_title %}Facturas{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="receipt" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Control y Registro de Facturas</h2>
+            <form action="/facturas/crear" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-success btn-small">
+                    <i data-lucide="file-plus"></i> Nueva Factura
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if facturas %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Fecha Emisión</th>
+                        <th>Total Factura</th>
+                        <th>Estado</th>
+                        {% if session.rol == 'admin' %}
+                        <th>Registró (Vendedor)</th>
+                        {% endif %}
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td><strong>{{ factura.numero_factura }}</strong></td>
+                        <td>{{ factura.cliente }}</td>
+                        <td>{{ factura.fecha_emision }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(factura.total) }}</td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if factura.estado == 'pagada' else 'warning' if factura.estado == 'abonada' else 'danger' }}">
+                                <i data-lucide="{% if factura.estado == 'pagada' %}check-circle{% elif factura.estado == 'abonada' %}clock{% else %}alert-circle{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ factura.estado }}
+                            </span>
+                        </td>
+                        {% if session.rol == 'admin' %}
+                        <td>{{ factura.vendedor }}</td>
+                        {% endif %}
+                        <td>
+                            <a href="/facturas/ver/{{ factura.id }}" class="btn btn-secondary btn-small" title="Ver Factura">
+                                <i data-lucide="eye"></i> <span>Ver</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="receipt" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No se registran facturas en la base de datos.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

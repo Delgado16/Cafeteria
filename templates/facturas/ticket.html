@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #{{ factura.numero_factura }}</title>
+    <style>
+        /* Estilos base para el ticket */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f4f4f4;
+            color: #000;
+            font-size: 12px;
+        }
+
+        .ticket-container {
+            width: 300px; /* ~80mm width */
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        
+        .bold { font-weight: bold; }
+        
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+
+        h1, h2, h3, p {
+            margin: 0;
+            padding: 2px 0;
+        }
+        
+        h1 { font-size: 1.5em; }
+        h2 { font-size: 1.2em; }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+        }
+        
+        .table th, .table td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+        
+        .table th {
+            border-bottom: 1px dashed #000;
+            text-align: left;
+        }
+        
+        .item-name {
+            display: block;
+            width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .totals {
+            margin-top: 10px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        .grand-total {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 5px;
+            border-top: 1px dashed #000;
+            padding-top: 5px;
+        }
+
+        /* Estilos específicos para impresión */
+        @media print {
+            @page {
+                margin: 0;
+                size: 80mm auto; /* Forzar el tamaño de la hoja a 80mm en la previsualización */
+            }
+            body {
+                background-color: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            .ticket-container {
+                width: 75mm; /* Ancho imprimible seguro para el rollo de 80mm */
+                margin: 0 auto;
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            /* Ocultar botón de imprimir en el papel */
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .no-print {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        
+        .btn-secondary {
+            background-color: #666;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn" onclick="window.print()">🖨️ Imprimir Ticket</button>
+        <button class="btn btn-secondary" onclick="window.close()">❌ Cerrar</button>
+    </div>
+
+    <div class="ticket-container">
+        <div class="text-center">
+            <h1>CAFETERÍA PREMIUM</h1>
+            <p>Cafetería Premium del Sur S.A.C.</p>
+            <p>RUC: 102030405060</p>
+            <p>Tel: +505 1234 5678</p>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div>
+            <p><span class="bold">Ticket #:</span> {{ factura.numero_factura }}</p>
+            <p><span class="bold">Fecha:</span> {{ factura.fecha_emision }}</p>
+            <p><span class="bold">Cajero:</span> {{ factura.vendedor_nombre }}</p>
+            <p><span class="bold">Cliente:</span> {{ factura.cliente_nombre }}</p>
+            <p><span class="bold">Venta:</span> <span style="text-transform: capitalize;">{{ factura.tipo_venta }}</span></p>
+        </div>
+
+        <div class="divider"></div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cant</th>
+                    <th>Desc</th>
+                    <th class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>
+                        <span class="item-name">{{ detalle.producto_nombre }}</span>
+                        <small>C${{ "%.2f"|format(detalle.precio_unitario) }}</small>
+                    </td>
+                    <td class="text-right">C${{ "%.2f"|format(detalle.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <div class="totals">
+            <div class="totals-row grand-total">
+                <span>TOTAL</span>
+                <span>C${{ "%.2f"|format(factura.total) }}</span>
+            </div>
+            
+            <div class="text-center" style="margin-top: 15px;">
+                <p>Estado: {{ factura.estado|upper }}</p>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="text-center" style="margin-top: 15px; margin-bottom: 20px;">
+            <p>¡Gracias por su compra!</p>
+            <p>Vuelva pronto</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-imprimir al abrir la ventana
+        window.onload = function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

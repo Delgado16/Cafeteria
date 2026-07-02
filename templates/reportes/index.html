@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Centro de Reportes{% endblock %}
+
+{% block section_title %}Centro de Reportes{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Centro de Reportes</h1>
+    <p class="text-muted">Genere, visualice y descargue reportes del sistema en formato PDF y Excel.</p>
+</div>
+
+<div class="grid grid-3">
+    <!-- Cuentas por Cobrar Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="landmark" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Cuentas por Cobrar</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Reporte consolidado del saldo adeudado por los clientes, incluyendo datos de contacto e importes pendientes totales.</p>
+            <div class="btn-group" style="width: 100%;">
+                <a href="/reportes/cuentas-por-cobrar" class="btn btn-primary" style="flex-grow: 1;">
+                    <i data-lucide="eye"></i> Ver Reporte
+                </a>
+                <a href="/reportes/cuentas-por-cobrar/pdf" class="btn btn-secondary" style="flex-grow: 1;">
+                    <i data-lucide="file-text"></i> PDF
+                </a>
+                <a href="/reportes/cuentas-por-cobrar/excel" class="btn btn-success" style="flex-grow: 1;">
+                    <i data-lucide="file-spreadsheet"></i> Excel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Facturas Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="receipt" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Registro de Ventas</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Reporte y filtros avanzados de facturas emitidas por fecha, estado de pago (pagada, abonada, pendiente) y vendedor.</p>
+            <div class="btn-group" style="width: 100%;">
+                <a href="/reportes/facturas" class="btn btn-primary" style="width: 100%;">
+                    <i data-lucide="sliders"></i> Filtrar y Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventario Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="coffee" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Inventario y Stock</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted" style="margin-bottom: 1.5rem;">Reporte detallado del stock disponible, alertas de productos agotados y control de existencias críticas.</p>
+            <div class="btn-group" style="width: 100%;">
+                <a href="/reportes/inventario" class="btn btn-primary" style="flex-grow: 1;">
+                    <i data-lucide="eye"></i> Ver Reporte
+                </a>
+                <a href="/reportes/inventario?bajo_stock=true" class="btn btn-danger" style="flex-grow: 1;">
+                    <i data-lucide="alert-triangle"></i> Bajo Stock
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

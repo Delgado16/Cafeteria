@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Cuentas por Cobrar{% endblock %}
+
+{% block section_title %}Cuentas por Cobrar{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="landmark" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Control de Saldos y Cuentas por Cobrar</h2>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if cuentas %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Factura</th>
+                        <th>Cliente</th>
+                        <th>Monto Original</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Estado</th>
+                        <th>Fecha Emisión</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cuenta in cuentas %}
+                    <tr>
+                        <td><strong>{{ cuenta.numero_factura }}</strong></td>
+                        <td>{{ cuenta.cliente }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(cuenta.monto_original) }}</td>
+                        <td style="color: {% if cuenta.saldo_pendiente > 0 %}var(--danger){% else %}var(--success){% endif %}; font-weight: 700;">
+                            C${{ "%.2f"|format(cuenta.saldo_pendiente) }}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if cuenta.estado == 'pagada' else 'warning' if cuenta.estado == 'abonada' else 'danger' }}">
+                                <i data-lucide="{% if cuenta.estado == 'pagada' %}check-circle{% elif cuenta.estado == 'abonada' %}clock{% else %}alert-circle{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ cuenta.estado }}
+                            </span>
+                        </td>
+                        <td>{{ cuenta.fecha_emision }}</td>
+                        <td>
+                            <div class="btn-group">
+                                {% if cuenta.estado != 'pagada' %}
+                                <a href="/cuentas/pagar/{{ cuenta.id }}" class="btn btn-success btn-small" title="Registrar Pago">
+                                    <i data-lucide="credit-card"></i> <span>Pagar</span>
+                                </a>
+                                {% endif %}
+                                <a href="/cuentas/historial-pagos/{{ cuenta.id }}" class="btn btn-secondary btn-small" title="Historial de Pagos">
+                                    <i data-lucide="activity"></i> <span>Historial</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="landmark" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No existen cuentas por cobrar pendientes en el sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

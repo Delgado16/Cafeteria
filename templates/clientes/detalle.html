@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Cliente{% endblock %}
+
+{% block section_title %}Ficha de Cliente{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">{{ cliente.nombre }}</h1>
+        <p class="text-muted">Detalles completos del cliente y estado de cuenta.</p>
+    </div>
+    <a href="/clientes" class="btn btn-secondary">
+        <i data-lucide="arrow-left"></i> Volver a Clientes
+    </a>
+</div>
+
+<div class="grid grid-3">
+    <!-- Información de Contacto -->
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+            <h3><i data-lucide="user" style="vertical-align: middle; margin-right: 0.5rem; width: 18px; height: 18px; color: var(--primary);"></i> Datos de Contacto</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div>
+                    <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Cédula / ID</div>
+                    <div style="font-weight: 600; margin-bottom: 0.75rem;"><code style="font-family: var(--font-mono);">{{ cliente.cedula }}</code></div>
+                    
+                    <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Celular</div>
+                    <div style="font-weight: 600; margin-bottom: 0.75rem;">{{ cliente.celular if cliente.celular else '-' }}</div>
+                    
+                    <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Correo</div>
+                    <div style="font-weight: 600;">{{ cliente.email if cliente.email else '-' }}</div>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Dirección</div>
+                    <div style="font-weight: 600; margin-bottom: 0.75rem;">{{ cliente.direccion if cliente.direccion else '-' }}</div>
+                    
+                    <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Ciudad</div>
+                    <div style="font-weight: 600;">{{ cliente.ciudad if cliente.ciudad else '-' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saldo Consolidado Card -->
+    <div class="card">
+        <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+            <h3><i data-lucide="wallet" style="vertical-align: middle; margin-right: 0.5rem; width: 18px; height: 18px; color: var(--primary);"></i> Estado de Cuenta</h3>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; height: calc(100% - 40px); justify-content: space-between;">
+            <div>
+                <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem;">Saldo Pendiente Total</div>
+                <div style="font-size: 2rem; font-weight: 800; color: {% if total_deuda > 0 %}var(--danger){% else %}var(--success){% endif %}; letter-spacing: -0.03em;">
+                    C${{ "%.2f"|format(total_deuda) }}
+                </div>
+            </div>
+            
+            {% if session.rol != 'admin' and total_deuda > 0 %}
+            <div style="margin-top: 1.5rem;">
+                <a href="/cuentas/abonar/{{ cliente.id }}" class="btn btn-success" style="width: 100%;">
+                    <i data-lucide="dollar-sign"></i> Registrar Abono
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="receipt" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Historial de Facturas</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if facturas %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Número Factura</th>
+                        <th>Fecha Emisión</th>
+                        <th>Total</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td><strong>{{ factura.numero_factura }}</strong></td>
+                        <td>{{ factura.fecha_emision }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(factura.total) }}</td>
+                        <td style="font-weight: 700; color: {% if factura.saldo_pendiente and factura.saldo_pendiente > 0 %}var(--danger){% else %}var(--success){% endif %};">
+                            C${{ "%.2f"|format(factura.saldo_pendiente if factura.saldo_pendiente is not none else factura.total) }}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if factura.estado == 'pagada' else 'warning' if factura.estado == 'abonada' else 'danger' }}">
+                                <i data-lucide="{% if factura.estado == 'pagada' %}check-circle{% elif factura.estado == 'abonada' %}clock{% else %}alert-circle{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ factura.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/facturas/ver/{{ factura.id }}" class="btn btn-secondary btn-small">
+                                    <i data-lucide="eye"></i> Ver
+                                </a>
+                                {% if session.rol == 'admin' and factura.estado != 'pagada' %}
+                                <a href="/cuentas/pagar/{{ factura.id }}" class="btn btn-success btn-small">
+                                    <i data-lucide="credit-card"></i> Pagar
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="file-text" style="width: 40px; height: 40px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">Este cliente no registra facturas en el sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,754 @@
+{% extends "base.html" %}
+
+{% block title %}Punto de Venta - Cafetería{% endblock %}
+
+{% block section_title %}Punto de Venta (POS){% endblock %}
+
+{% block extra_css %}
+<style>
+    .pos-layout {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        width: 100%;
+    }
+    
+    .pos-products-column {
+        flex: 1.7;
+        min-width: 0;
+    }
+    
+    .pos-cart-column {
+        flex: 1.3;
+        position: sticky;
+        top: 90px;
+        height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Search bar styles */
+    .pos-search-wrapper {
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+    
+    .pos-search-wrapper i {
+        position: absolute;
+        left: 1.15rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        width: 18px;
+        height: 18px;
+        pointer-events: none;
+    }
+    
+    .pos-search-input {
+        padding-left: 2.75rem;
+        border-radius: 50px;
+        border-color: var(--border);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Products grid */
+    .pos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 1.15rem;
+        margin-top: 0.5rem;
+    }
+
+    .pos-product-card {
+        background-color: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        user-select: none;
+    }
+    
+    .pos-product-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--border-focus);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .pos-product-card:active {
+        transform: translateY(-2px);
+    }
+
+    /* Product card images */
+    .product-img-box {
+        width: 100%;
+        height: 130px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #eae5e0, #cfc5bc);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .pos-product-card:hover .product-img {
+        transform: scale(1.05);
+    }
+
+    .product-img-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-img-fallback img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .pos-card-info {
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    
+    .pos-card-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        line-height: 1.25;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.4em; /* Mantiene altura fija de 2 líneas */
+    }
+    
+    .pos-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .pos-card-price {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    
+    .pos-card-stock {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 600;
+        background-color: var(--bg-base);
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+    }
+
+    .pos-card-stock.out-of-stock {
+        background-color: var(--danger-light);
+        color: var(--danger);
+        border-color: rgba(190, 18, 60, 0.1);
+    }
+
+    /* Cart Column Styling */
+    .pos-cart-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        margin-bottom: 0;
+        min-height: 0;
+    }
+
+    .cart-invoice-meta {
+        background-color: var(--primary-light);
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 0.5rem;
+        border: 1px solid hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.08);
+    }
+
+    .cart-invoice-meta p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .cart-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        overflow-y: auto;
+        flex-grow: 1;
+        margin-bottom: 0.5rem;
+        padding-right: 0.25rem;
+        min-height: 50px;
+    }
+
+    /* Scrollbar para la lista de compras */
+    .cart-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .cart-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .cart-list::-webkit-scrollbar-thumb {
+        background-color: var(--border);
+        border-radius: 3px;
+    }
+
+    .cart-item {
+        display: flex;
+        flex-direction: column;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px dashed var(--border);
+        background-color: transparent;
+        transition: var(--transition);
+        animation: fadeIn 0.2s ease;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .cart-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .cart-item-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        line-height: 1.2;
+    }
+    
+    .cart-item-price {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        white-space: nowrap;
+    }
+    
+    .cart-item-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .qty-btn {
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1rem;
+        transition: var(--transition);
+        user-select: none;
+    }
+    
+    .qty-btn:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+    
+    .qty-val {
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .cart-item-subtotal {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+    }
+    
+    .cart-item-delete {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.35rem;
+        border-radius: 50%;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .cart-item-delete:hover {
+        color: var(--danger);
+        background-color: var(--danger-light);
+    }
+
+    .pos-summary {
+        border-top: 2px solid var(--border);
+        padding-top: 1.25rem;
+        margin-top: auto;
+    }
+
+    .pos-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .pos-total-label {
+        font-weight: 700;
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    .pos-total-value {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: var(--primary);
+        letter-spacing: -0.03em;
+    }
+
+    .btn-finalize {
+        width: 100%;
+        padding: 0.95rem;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: var(--radius);
+        box-shadow: 0 4px 14px rgba(21, 128, 61, 0.2);
+    }
+
+    /* Low stock or inactive styling for card list */
+    .pos-product-card.card-out-of-stock {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    @media (max-width: 992px) {
+        .pos-layout {
+            flex-direction: column-reverse;
+            gap: 1.5rem;
+        }
+        
+        .pos-cart-column {
+            width: 100%;
+            position: static;
+            max-height: none;
+        }
+        
+        .pos-products-column {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-layout">
+    <!-- Columna Izquierda: Grid de Productos -->
+    <div class="pos-products-column">
+        <div class="pos-search-wrapper">
+            <input type="search" id="posSearch" class="pos-search-input" placeholder="Buscar producto por nombre..." autocomplete="off">
+            <i data-lucide="search"></i>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error">
+            <i class="alert-icon" data-lucide="alert-circle"></i>
+            <div class="alert-content">{{ error }}</div>
+        </div>
+        {% endif %}
+
+        <div class="pos-grid" id="posGrid">
+            {% for producto in productos %}
+            <div class="pos-product-card {% if producto.stock <= 0 %}card-out-of-stock{% endif %}" 
+                 data-id="{{ producto.id }}" 
+                 data-name="{{ producto.nombre|lower }}"
+                 onclick="agregarAlCarrito({{ producto.id }})">
+                
+                <div class="product-img-box">
+                    {% if producto.imagen %}
+                        <img src="/static/uploads/productos/{{ producto.imagen }}" alt="{{ producto.nombre }}" class="product-img" loading="lazy">
+                    {% else %}
+                        <div class="product-img-fallback" data-name="{{ producto.nombre|lower }}">
+                            <!-- fallback image set by JS -->
+                            <div style="padding: 1rem; text-align: center;"><i data-lucide="coffee" style="width: 24px; height: 24px; color: var(--text-muted);"></i></div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="pos-card-info">
+                    <h4 class="pos-card-title" title="{{ producto.nombre }}">{{ producto.nombre }}</h4>
+                    <div class="pos-card-footer">
+                        <span class="pos-card-price">C${{ "%.2f"|format(producto.precio_venta) }}</span>
+                        {% if producto.stock <= 0 %}
+                        <span class="pos-card-stock out-of-stock">Agotado</span>
+                        {% else %}
+                        <span class="pos-card-stock">Stock: {{ producto.stock }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div id="noProductsFound" class="text-center p-4" style="display: none;">
+            <i data-lucide="info" style="width: 36px; height: 36px; color: var(--text-muted); margin-bottom: 0.5rem; display: inline-block;"></i>
+            <p class="text-muted">No se encontraron productos con ese nombre.</p>
+        </div>
+    </div>
+
+    <!-- Columna Derecha: Resumen de Factura / Carrito -->
+    <div class="pos-cart-column">
+        <div class="card pos-cart-card">
+            <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i data-lucide="shopping-cart" style="vertical-align: middle; margin-right: 0.5rem; width: 18px; height: 18px; color: var(--primary);"></i> Detalle de Consumos</span>
+                    <span class="badge badge-primary">{{ detalles|length }} ítems</span>
+                </h3>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; padding: 0; min-height: 0;">
+                <div class="cart-invoice-meta" style="padding: 0.85rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <p style="margin:0;"><strong>Factura:</strong> {{ factura.numero_factura }}</p>
+                        <p style="margin:0;"><strong>Fecha:</strong> {{ factura.fecha_emision }}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 0.5rem;">
+                        <label for="clienteId" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">CLIENTE</label>
+                        <select id="clienteId" style="width: 100%; padding: 0.45rem; border-radius: var(--radius-sm); margin-top: 0.25rem; border: 1px solid var(--border); font-size: 0.9rem;">
+                            {% for c in clientes %}
+                            <option value="{{ c.id }}" {% if c.id == factura.cliente_id %}selected{% endif %}>
+                                {% if c.cedula %}{{ c.cedula }} - {% endif %}{{ c.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="tipoVentaSelect" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">TIPO DE VENTA</label>
+                        <select id="tipoVentaSelect" style="width: 100%; padding: 0.45rem; border-radius: var(--radius-sm); margin-top: 0.25rem; border: 1px solid var(--border); font-size: 0.9rem;">
+                            <option value="contado" {% if factura.tipo_venta == 'contado' %}selected{% endif %}>Contado</option>
+                            <option value="credito" {% if factura.tipo_venta == 'credito' %}selected{% endif %}>Crédito</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de items del carrito -->
+                <div class="cart-list" id="cartList">
+                    {% if detalles %}
+                        {% for detalle in detalles %}
+                        <div class="cart-item" data-producto-id="{{ detalle.producto_id }}">
+                            <div class="cart-item-header">
+                                <span class="cart-item-name">{{ detalle.producto_nombre }}</span>
+                                <span class="cart-item-price">C${{ "%.2f"|format(detalle.precio_unitario) }} c/u</span>
+                            </div>
+                            <div class="cart-item-actions">
+                                <div class="quantity-controls">
+                                    <button type="button" class="qty-btn" onclick="ajustarCantidad({{ detalle.producto_id }}, -1)">-</button>
+                                    <span class="qty-val">{{ detalle.cantidad }}</span>
+                                    <button type="button" class="qty-btn" onclick="ajustarCantidad({{ detalle.producto_id }}, 1)">+</button>
+                                </div>
+                                <span class="cart-item-subtotal">C${{ "%.2f"|format(detalle.subtotal) }}</span>
+                                <button type="button" class="cart-item-delete" onclick="eliminarLinea({{ detalle.id }})" title="Eliminar artículo">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center p-4 text-muted" style="margin: auto 0; display: flex; flex-direction: column; align-items: center;">
+                            <i data-lucide="shopping-bag" style="width: 40px; height: 40px; margin-bottom: 0.75rem; color: var(--text-muted);"></i>
+                            <p style="font-size: 0.9rem;">El carrito está vacío. Haga clic en los productos para agregarlos.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Resumen y finalizar -->
+                <div class="pos-summary">
+                    <div class="pos-total-row">
+                        <span class="pos-total-label">TOTAL FACTURA</span>
+                        <span class="pos-total-value" id="cartTotal">C${{ "%.2f"|format(factura.total) }}</span>
+                    </div>
+
+                    <div class="btn-group">
+                        <a href="/facturas" class="btn btn-secondary" style="flex: 1;">
+                            <i data-lucide="arrow-left"></i> Cancelar
+                        </a>
+                        {% if detalles %}
+                        <button type="button" class="btn btn-success btn-finalize" id="btnFinalize" onclick="finalizarOrden()">
+                            <i data-lucide="check-circle-2"></i> Cobrar y Emitir
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Modal Confirmación -->
+<div id="customConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div style="background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 400px; width: 90%; box-shadow: var(--shadow-lg); animation: fadeIn 0.2s ease;">
+        <h3 id="modalTitle" style="margin-bottom: 0.75rem; color: var(--text-dark); font-size: 1.25rem;">Confirmar</h3>
+        <p id="modalMessage" style="margin-bottom: 1.5rem; color: var(--text-light); font-size: 0.95rem;"></p>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button id="modalBtnCancel" class="btn btn-secondary">Cancelar</button>
+            <button id="modalBtnConfirm" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    const facturaId = window.location.pathname.split('/').pop();
+
+    // Banco de imágenes profesionales de Unsplash basadas en el nombre del producto
+    const unsplashImages = {
+        'espresso': 'https://images.unsplash.com/photo-1510707577719-0d34162fc999?w=300',
+        'americano': 'https://images.unsplash.com/photo-1551030173-122aabc4489c?w=300',
+        'cappuccino': 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300',
+        'latte': 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=300',
+        'mocha': 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=300',
+        'moka': 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=300',
+        'croissant': 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=300',
+        'pastel': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300',
+        'galleta': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=300',
+        'cookie': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=300',
+        'jugo': 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=300',
+        'juice': 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=300',
+        'agua': 'https://images.unsplash.com/photo-1608885898957-a599fb15ec36?w=300',
+        'water': 'https://images.unsplash.com/photo-1608885898957-a599fb15ec36?w=300',
+        'tarta': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300',
+        'torta': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300'
+    };
+
+    // Aplicar imágenes fallback en carga
+    document.querySelectorAll('.product-img-fallback').forEach(el => {
+        const name = el.getAttribute('data-name');
+        let matchedUrl = null;
+        for (const [key, url] of Object.entries(unsplashImages)) {
+            if (name.includes(key)) {
+                matchedUrl = url;
+                break;
+            }
+        }
+        if (!matchedUrl) {
+            // Imagen de café genérica por defecto
+            matchedUrl = 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300';
+        }
+        el.innerHTML = `<img src="${matchedUrl}" alt="Product" class="product-img" loading="lazy">`;
+    });
+
+    // Filtro buscador de productos en tiempo real
+    const searchInput = document.getElementById('posSearch');
+    const productCards = document.querySelectorAll('.pos-product-card');
+    const noProductsMsg = document.getElementById('noProductsFound');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            let hasMatches = false;
+            
+            productCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name.includes(query)) {
+                    card.style.display = 'flex';
+                    hasMatches = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (hasMatches) {
+                noProductsMsg.style.display = 'none';
+            } else {
+                noProductsMsg.style.display = 'block';
+            }
+        });
+    }
+
+    // Registrar cambios AJAX
+    function postChange(productoId, cantidadChange) {
+        return fetch(`/facturas/editar/${facturaId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                producto_id: productoId,
+                cantidad: cantidadChange
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Error en petición') });
+            }
+            return response.json();
+        });
+    }
+
+    // Custom Modal logic
+    function showConfirm(title, message, confirmText, confirmClass, callback) {
+        const modal = document.getElementById('customConfirmModal');
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        
+        const btnConfirm = document.getElementById('modalBtnConfirm');
+        btnConfirm.textContent = confirmText || 'Confirmar';
+        btnConfirm.className = `btn ${confirmClass || 'btn-primary'}`;
+        
+        const close = () => { modal.style.display = 'none'; };
+        document.getElementById('modalBtnCancel').onclick = close;
+        
+        btnConfirm.onclick = () => {
+            close();
+            if (callback) callback();
+        };
+        
+        modal.style.display = 'flex';
+    }
+
+    // Reload Cart via Fetch (Evita recargar toda la página)
+    function reloadCart() {
+        fetch(window.location.href)
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            document.getElementById('cartList').innerHTML = doc.getElementById('cartList').innerHTML;
+            document.getElementById('cartTotal').innerHTML = doc.getElementById('cartTotal').innerHTML;
+            document.querySelector('.pos-cart-card .badge-primary').innerHTML = doc.querySelector('.pos-cart-card .badge-primary').innerHTML;
+            
+            const newBtn = doc.getElementById('btnFinalize');
+            const oldBtn = document.getElementById('btnFinalize');
+            
+            if (newBtn && !oldBtn) {
+                document.querySelector('.btn-group').innerHTML += newBtn.outerHTML;
+            } else if (!newBtn && oldBtn) {
+                oldBtn.remove();
+            }
+        })
+        .catch(err => console.error('Error recargando carrito', err));
+    }
+
+    // Agregar producto haciendo clic
+    function agregarAlCarrito(productoId) {
+        postChange(productoId, 1)
+        .then(data => {
+            if (data.success) reloadCart();
+        })
+        .catch(err => alert('Error al agregar: ' + err.message));
+    }
+
+    // Ajustar cantidad (+ o -)
+    function ajustarCantidad(productoId, change) {
+        postChange(productoId, change)
+        .then(data => {
+            if (data.success) reloadCart();
+        })
+        .catch(err => alert('Error al ajustar cantidad: ' + err.message));
+    }
+
+    // Eliminar línea completa
+    function eliminarLinea(detalleId) {
+        showConfirm('Eliminar artículo', '¿Desea quitar este artículo de la factura?', 'Eliminar', 'btn-danger', () => {
+            fetch(`/facturas/eliminar-detalle/${detalleId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Error al eliminar');
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) reloadCart();
+            })
+            .catch(err => alert(err.message));
+        });
+    }
+
+    // Finalizar factura
+    function finalizarOrden() {
+        const clienteId = document.getElementById('clienteId').value;
+        const tipoVenta = document.getElementById('tipoVentaSelect').value;
+        
+        showConfirm('Finalizar Venta', '¿Finalizar y emitir esta factura?', 'Cobrar y Emitir', 'btn-success', () => {
+            fetch(`/facturas/finalizar/${facturaId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    cliente_id: parseInt(clienteId),
+                    tipo_venta: tipoVenta
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Error al finalizar la factura');
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.open('/facturas/ticket/' + facturaId, '_blank');
+                    window.location.href = '/facturas';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(err => alert(err.message));
+        });
+    }
+
+</script>
+{% endblock %}

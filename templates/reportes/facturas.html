@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de Facturas{% endblock %}
+
+{% block section_title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;">
+                <i data-lucide="receipt" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i>
+                Reporte e Historial de Facturas
+            </h2>
+            <a href="/reportes" class="btn btn-secondary btn-small">
+                <i data-lucide="arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <form method="GET" style="background-color: var(--primary-light); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; border: 1px solid hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.08);">
+            <div class="grid grid-3" style="margin-bottom: 1rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="fecha_inicio">Fecha Inicio</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="fecha_fin">Fecha Fin</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="estado">Estado de Pago</label>
+                    <select id="estado" name="estado">
+                        <option value="todos" {% if estado == 'todos' %}selected{% endif %}>Todos los Estados</option>
+                        <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="abonada" {% if estado == 'abonada' %}selected{% endif %}>Abonada</option>
+                        <option value="pagada" {% if estado == 'pagada' %}selected{% endif %}>Pagada</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary btn-small">
+                    <i data-lucide="filter"></i> Filtrar Registros
+                </button>
+            </div>
+        </form>
+
+        <!-- Resultados -->
+        {% if facturas %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Fecha Emisión</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Registró (Vendedor)</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td><strong>{{ factura.numero_factura }}</strong></td>
+                        <td>{{ factura.cliente }}</td>
+                        <td>{{ factura.fecha_emision }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(factura.total) }}</td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if factura.estado == 'pagada' else 'warning' if factura.estado == 'abonada' else 'danger' }}">
+                                <i data-lucide="{% if factura.estado == 'pagada' %}check-circle{% elif factura.estado == 'abonada' %}clock{% else %}alert-circle{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ factura.estado }}
+                            </span>
+                        </td>
+                        <td>{{ factura.vendedor }}</td>
+                        <td>
+                            <a href="/facturas/ver/{{ factura.id }}" class="btn btn-secondary btn-small" title="Ver Factura">
+                                <i data-lucide="eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="receipt" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No se encontraron facturas que coincidan con los filtros aplicados.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

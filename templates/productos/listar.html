@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Productos{% endblock %}
+
+{% block section_title %}Productos{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="coffee" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Inventario de Productos</h2>
+            <a href="/productos/crear" class="btn btn-primary btn-small">
+                <i data-lucide="plus-circle"></i> Nuevo Producto
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if productos %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Descripción</th>
+                        <th>Precio Venta</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--text-dark);">{{ producto.nombre }}</div>
+                        </td>
+                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ producto.descripcion if producto.descripcion else '-' }}
+                        </td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(producto.precio_venta) }}</td>
+                        <td>
+                            {% if producto.stock <= 0 %}
+                            <span class="badge badge-danger" style="font-weight: 600;">{{ producto.stock }} (Sin stock)</span>
+                            {% elif producto.stock < 10 %}
+                            <span class="badge badge-warning" style="font-weight: 600;">{{ producto.stock }} (Bajo)</span>
+                            {% else %}
+                            <span style="font-weight: 600;">{{ producto.stock }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if producto.activo %}badge-success{% else %}badge-danger{% endif %}">
+                                <i data-lucide="{% if producto.activo %}check{% else %}x{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/productos/editar/{{ producto.id }}" class="btn btn-secondary btn-small" title="Editar">
+                                    <i data-lucide="edit-2"></i> <span>Editar</span>
+                                </a>
+                                <form method="POST" action="/productos/eliminar/{{ producto.id }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-{{ 'danger' if producto.activo else 'success' }} btn-small" onclick="return confirm('¿Está seguro de que desea cambiar el estado de este producto?')" title="{{ 'Desactivar' if producto.activo else 'Activar' }}">
+                                        <i data-lucide="{{ 'slash' if producto.activo else 'check-circle' }}"></i> <span>{{ 'Desactivar' if producto.activo else 'Activar' }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="coffee" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No hay productos registrados en el inventario. <a href="/productos/crear" style="color: var(--primary); font-weight: 600;">Crear uno ahora</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

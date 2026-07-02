@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Pagos{% endblock %}
+
+{% block section_title %}Historial de Cobro{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Historial de Transacciones</h1>
+        <p class="text-muted">Detalles de pagos realizados contra esta cuenta por cobrar.</p>
+    </div>
+    <a href="/cuentas" class="btn btn-secondary">
+        <i data-lucide="arrow-left"></i> Volver a Cuentas
+    </a>
+</div>
+
+<div class="grid grid-3" style="margin-bottom: 2rem;">
+    <div class="card" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div>
+                <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Número Factura</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-dark);">{{ cuenta.numero_factura }}</div>
+            </div>
+            <div>
+                <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Cliente Relacionado</div>
+                <div style="font-weight: 600; color: var(--text-dark);">{{ cuenta.cliente_nombre }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-left: 4px solid var(--primary);">
+        <div class="text-muted" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.25rem;">Saldo Pendiente</div>
+        <div style="font-size: 1.85rem; font-weight: 800; color: {% if cuenta.saldo_pendiente > 0 %}var(--danger){% else %}var(--success){% endif %}; letter-spacing: -0.025em; line-height: 1.2;">
+            C${{ "%.2f"|format(cuenta.saldo_pendiente) }}
+        </div>
+        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+            Original: C${{ "%.2f"|format(cuenta.monto_original) }}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 style="font-size: 1.25rem; font-weight: 800;"><i data-lucide="history" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Pagos Registrados</h3>
+    </div>
+    <div class="card-body">
+        {% if pagos %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha de Transacción</th>
+                        <th>Monto Recibido</th>
+                        <th>Referencia</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td>{{ pago.fecha_pago }}</td>
+                        <td style="color: var(--success); font-weight: 700;">C${{ "%.2f"|format(pago.monto) }}</td>
+                        <td>{{ pago.referencia if pago.referencia else '-' }}</td>
+                        <td>{{ pago.observaciones if pago.observaciones else '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="alert-circle" style="width: 40px; height: 40px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No se registran abonos ni pagos parciales en esta factura.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

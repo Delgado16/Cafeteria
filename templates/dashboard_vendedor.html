@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Vendedor{% endblock %}
+
+{% block section_title %}Panel Vendedor{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Bienvenido de nuevo, {{ session.nombre }}</h1>
+    <p class="text-muted">Panel de ventas y facturación para atención al cliente.</p>
+</div>
+
+<div class="grid grid-2">
+    <div class="stat-card primary">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Mis Facturas Registradas</div>
+            <div class="stat-card-value">{{ total_facturas }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="receipt"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Monto por Cobrar Pendiente</div>
+            <div class="stat-card-value">C${{ "%.2f"|format(monto_pendiente) }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="dollar-sign"></i>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i data-lucide="zap" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 0.5rem; color: var(--warning);"></i> Acciones de Facturación</h3>
+    </div>
+    <div class="card-body">
+        <div class="btn-group">
+            <a href="/facturas/crear" class="btn btn-success" style="flex-grow: 1;">
+                <i data-lucide="file-plus"></i> Nueva Factura
+            </a>
+            <a href="/facturas" class="btn btn-primary" style="flex-grow: 1;">
+                <i data-lucide="file-text"></i> Ver Mis Facturas
+            </a>
+            <a href="/clientes" class="btn btn-primary" style="flex-grow: 1;">
+                <i data-lucide="users"></i> Ver Clientes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

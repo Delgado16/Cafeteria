@@ -1,0 +1,684 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Administrador{% endblock %}
+
+{% block section_title %}Resumen General{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos específicos de Dashboard */
+    .stat-card {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s;
+        border: 1px solid var(--border);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: hsl(var(--primary-h), var(--primary-s), 45%);
+    }
+
+    .stat-card-icon {
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover .stat-card-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Sección de Gráficos */
+    .dashboard-charts {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 992px) {
+        .dashboard-charts {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+    .chart-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+    .chart-card-title {
+        font-size: 1.1rem;
+        font-weight: 750;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Grid de Actividad y Alertas */
+    .dashboard-details-grid {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr 0.75fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 1200px) {
+        .dashboard-details-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    @media (max-width: 768px) {
+        .dashboard-details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .detail-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .detail-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+    .detail-card-title {
+        font-size: 1.05rem;
+        font-weight: 750;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .mini-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+    .mini-table th {
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border);
+    }
+    .mini-table td {
+        padding: 0.75rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+    .mini-table tr:last-child td {
+        border-bottom: none;
+    }
+    .mini-table tr {
+        transition: background-color 0.2s;
+    }
+    .mini-table tr:hover {
+        background-color: #faf9f6;
+    }
+    
+    /* Items de Bajo Stock */
+    .low-stock-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .low-stock-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        background-color: var(--danger-light);
+        border: 1px solid rgba(190, 18, 60, 0.1);
+        transition: transform 0.2s;
+    }
+    .low-stock-item:hover {
+        transform: translateX(3px);
+    }
+    .low-stock-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .low-stock-name {
+        font-weight: 600;
+        color: #881337;
+        font-size: 0.9rem;
+    }
+    .low-stock-desc {
+        font-size: 0.75rem;
+        color: #be123c;
+    }
+    .low-stock-pill {
+        background-color: var(--danger);
+        color: white;
+        font-weight: 750;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 50px;
+    }
+    
+    .shortcut-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    .shortcut-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+        background-color: var(--bg-base);
+        border: 1px solid var(--border);
+        color: var(--text-dark);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    .shortcut-pill:hover {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-1px);
+    }
+    .shortcut-pill i {
+        width: 14px;
+        height: 14px;
+    }
+</style>
+
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Bienvenido de nuevo, {{ session.nombre }}</h1>
+    <p class="text-muted">Panel de control de administración para el sistema de facturación.</p>
+</div>
+
+<!-- Grid de KPIs Primarios -->
+<div class="grid grid-3" style="margin-bottom: 1.5rem;">
+    <div class="stat-card success">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Ventas de Hoy</div>
+            <div class="stat-card-value">C${{ "%.2f"|format(ventas_hoy) }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="trending-up"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card primary">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Ventas del Mes</div>
+            <div class="stat-card-value">C${{ "%.2f"|format(ventas_mes) }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="calendar"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Cartera Pendiente</div>
+            <div class="stat-card-value">C${{ "%.2f"|format(monto_pendiente) }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="landmark"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Grid de KPIs Secundarios -->
+<div class="grid grid-3" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Total Clientes</div>
+            <div class="stat-card-value">{{ total_clientes }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="users"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Productos en Sistema</div>
+            <div class="stat-card-value">{{ total_productos }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="coffee"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card {% if bajo_stock_count > 0 %}danger{% endif %}">
+        <div class="stat-card-details">
+            <div class="stat-card-label">Bajo Stock</div>
+            <div class="stat-card-value">{{ bajo_stock_count }}</div>
+        </div>
+        <div class="stat-card-icon">
+            <i data-lucide="alert-triangle"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de Gráficos Interactivos -->
+<div class="dashboard-charts">
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h3 class="chart-card-title">
+                <i data-lucide="line-chart" style="color: var(--primary);"></i>
+                Tendencia de Ingresos (Últimos 7 Días)
+            </h3>
+        </div>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h3 class="chart-card-title">
+                <i data-lucide="pie-chart" style="color: var(--warning);"></i>
+                Más Vendidos
+            </h3>
+        </div>
+        <div style="position: relative; height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            {% if productos_mas_vendidos_labels %}
+                <canvas id="productsChart"></canvas>
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <i data-lucide="shopping-bag" style="width: 48px; height: 48px; margin-bottom: 0.5rem; opacity: 0.5; display: inline-block;"></i>
+                    <p>Sin ventas registradas</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Fila de Detalles, Actividad y Alertas -->
+<div class="dashboard-details-grid">
+    <!-- Últimas Facturas -->
+    <div class="detail-card">
+        <div class="detail-card-header">
+            <h3 class="detail-card-title">
+                <i data-lucide="receipt" style="color: var(--primary);"></i>
+                Últimas Facturas
+            </h3>
+            <a href="/facturas" class="btn btn-secondary btn-small" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Ver Todas</a>
+        </div>
+        <div style="flex-grow: 1; overflow-x: auto;">
+            {% if ultimas_facturas %}
+            <table class="mini-table">
+                <thead>
+                    <tr>
+                        <th>Nº Factura</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fac in ultimas_facturas %}
+                    <tr>
+                        <td>
+                            <a href="/facturas/{{ fac.id }}" style="font-weight: 700; text-decoration: none; color: var(--primary);">
+                                {{ fac.numero_factura }}
+                            </a>
+                        </td>
+                        <td style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ fac.cliente }}</td>
+                        <td style="font-weight: 600;">C${{ "%.2f"|format(fac.total) }}</td>
+                        <td>
+                            {% if fac.estado == 'pagada' %}
+                                <span class="badge badge-success" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">Pagada</span>
+                            {% elif fac.estado == 'abonada' %}
+                                <span class="badge badge-primary" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">Abonada</span>
+                            {% elif fac.estado == 'pendiente' %}
+                                <span class="badge badge-warning" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">Pendiente</span>
+                            {% else %}
+                                <span class="badge badge-danger" style="font-size: 0.7rem; padding: 0.15rem 0.4rem;">Cancelada</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); min-height: 150px;">
+                    No hay facturas registradas
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Últimos Abonos -->
+    <div class="detail-card">
+        <div class="detail-card-header">
+            <h3 class="detail-card-title">
+                <i data-lucide="arrow-down-to-line" style="color: var(--success);"></i>
+                Abonos Recientes
+            </h3>
+            <a href="/cuentas" class="btn btn-secondary btn-small" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Ver Cuentas</a>
+        </div>
+        <div style="flex-grow: 1; overflow-x: auto;">
+            {% if ultimos_abonos %}
+            <table class="mini-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Monto</th>
+                        <th>Ref.</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for abono in ultimos_abonos %}
+                    <tr>
+                        <td style="font-weight: 600; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ abono.cliente }}</td>
+                        <td style="color: var(--success); font-weight: 700;">+C${{ "%.2f"|format(abono.monto) }}</td>
+                        <td><span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-light);">{{ abono.referencia or 'S/R' }}</span></td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">{{ abono.fecha_abono.strftime('%d/%m') if abono.fecha_abono.strftime else abono.fecha_abono }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); min-height: 150px; padding: 1rem 0;">
+                    <i data-lucide="info" style="margin-bottom: 0.5rem; opacity: 0.5; display: inline-block;"></i>
+                    <span>No hay abonos registrados</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Alertas y Navegación Rápida -->
+    <div class="detail-card">
+        <div class="detail-card-header">
+            <h3 class="detail-card-title">
+                <i data-lucide="alert-triangle" style="color: var(--danger);"></i>
+                Alertas de Stock
+            </h3>
+            <a href="/reportes/inventario?bajo_stock=true" class="btn btn-secondary btn-small" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Ver Todo</a>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px;">
+            <div class="low-stock-list">
+                {% if productos_bajo_stock %}
+                    {% for prod in productos_bajo_stock %}
+                    <div class="low-stock-item">
+                        <div class="low-stock-info">
+                            <span class="low-stock-name">{{ prod.nombre }}</span>
+                            <span class="low-stock-desc">Nivel crítico detectado</span>
+                        </div>
+                        <span class="low-stock-pill">{{ prod.stock }} unds</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align: center; color: var(--success); padding: 1rem 0;">
+                        <i data-lucide="check-circle" style="width: 40px; height: 40px; color: var(--success); margin-bottom: 0.5rem; opacity: 0.8; display: inline-block;"></i>
+                        <p style="font-size: 0.85rem; font-weight: 600;">¡Inventario al día!</p>
+                        <p style="font-size: 0.75rem; color: var(--text-light);">No hay productos con bajo stock.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Accesos Directos Rápidos -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">Accesos Directos</span>
+                <div class="shortcut-pills">
+                    <a href="/clientes/crear" class="shortcut-pill"><i data-lucide="user-plus"></i> Cliente</a>
+                    <a href="/productos/crear" class="shortcut-pill"><i data-lucide="plus-circle"></i> Producto</a>
+                    <a href="/facturas/crear" class="shortcut-pill"><i data-lucide="file-plus"></i> Factura</a>
+                    <a href="javascript:void(0)" onclick="abrirModalDeuda()" class="shortcut-pill" style="background-color: var(--danger-light); color: var(--danger); border-color: rgba(220,38,38,0.2);"><i data-lucide="check-square"></i> Cancelar Deuda</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Cancelar Deuda desde el Dashboard -->
+<div id="modalCancelarDeuda" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(2px);">
+    <div class="card" style="width:100%; max-width:450px; padding:2rem; animation: slideDown 0.3s ease;">
+        <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:1.5rem; color:var(--text-dark); display:flex; align-items:center; gap:0.5rem;">
+            <i data-lucide="check-square" style="color:var(--danger);"></i> Cancelar Deuda por Cliente
+        </h3>
+        <p class="text-muted" style="margin-bottom:1.5rem; font-size:0.9rem;">Seleccione el cliente para liquidar completamente todas sus cuentas por cobrar pendientes de una sola vez.</p>
+        
+        <form id="formCancelarDeuda" onsubmit="return submitCancelarDeuda(event)">
+            <div class="form-group">
+                <label for="cliente_deuda_id" style="font-weight:700;">Cliente con Deuda Pendiente</label>
+                <select id="cliente_deuda_id" name="cliente_id" class="form-control" required style="width:100%;">
+                    <option value="">Seleccione un cliente...</option>
+                    {% for cli in clientes_con_deuda %}
+                    <option value="{{ cli.id }}">C${{ "%.2f"|format(cli.deuda_total) }} - {{ cli.nombre }}</option>
+                    {% endfor %}
+                </select>
+                {% if not clientes_con_deuda %}
+                <small class="text-muted" style="color:var(--success) !important; font-weight:600; margin-top:0.5rem; display:block;"><i data-lucide="check-circle" style="width:12px; height:12px; vertical-align:middle;"></i> No hay clientes con deudas pendientes.</small>
+                {% endif %}
+            </div>
+            
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 2rem;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalDeuda()">Cerrar</button>
+                <button type="submit" class="btn btn-primary" {% if not clientes_con_deuda %}disabled{% endif %}>
+                    <i data-lucide="check"></i> Confirmar Cancelación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function abrirModalDeuda() {
+        document.getElementById('modalCancelarDeuda').style.display = 'flex';
+    }
+    function cerrarModalDeuda() {
+        document.getElementById('modalCancelarDeuda').style.display = 'none';
+    }
+    function submitCancelarDeuda(e) {
+        e.preventDefault();
+        const select = document.getElementById('cliente_deuda_id');
+        const clienteId = select.value;
+        const texto = select.options[select.selectedIndex].text;
+        
+        if(!clienteId) return false;
+        
+        if(confirm('¿Está seguro de cancelar TODA la deuda del cliente seleccionado (' + texto + ')? Esta acción registrará pagos automáticos para todas sus facturas pendientes.')) {
+            window.location.href = '/cuentas/cancelar-todo/' + clienteId;
+        }
+        return false;
+    }
+</script>
+
+<!-- Gestión de Módulos Rápida -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="margin-bottom: 0.25rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="sliders" style="color: var(--primary);"></i> Gestión de Módulos
+            </h3>
+            <p class="text-muted" style="margin-bottom: 0; font-size: 0.85rem;">Navegación rápida por las diferentes áreas del sistema de facturación.</p>
+        </div>
+        <div class="btn-group">
+            <a href="/clientes" class="btn btn-secondary">
+                <i data-lucide="users"></i> Clientes
+            </a>
+            <a href="/productos" class="btn btn-secondary">
+                <i data-lucide="coffee"></i> Productos
+            </a>
+            <a href="/facturas" class="btn btn-secondary">
+                <i data-lucide="receipt"></i> Facturas
+            </a>
+            <a href="/cuentas" class="btn btn-secondary">
+                <i data-lucide="landmark"></i> Cuentas
+            </a>
+            <a href="/admin/usuarios" class="btn btn-secondary">
+                <i data-lucide="user-cog"></i> Usuarios
+            </a>
+            <a href="/reportes/cuentas-por-cobrar" class="btn btn-secondary">
+                <i data-lucide="file-text"></i> Reporte Quincenal
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ChartJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- GRÁFICO DE VENTAS (ÚLTIMOS 7 DÍAS) ---
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        
+        // HSL a RGB para el color primario de la cafetería
+        const primaryColor = 'rgba(133, 77, 14, 1)';
+        const primaryColorLight = 'rgba(133, 77, 14, 0.08)';
+        
+        const salesChart = new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: {{ ventas_semana_labels | tojson }},
+                datasets: [{
+                    label: 'Ingresos Diarios (C$)',
+                    data: {{ ventas_semana_valores | tojson }},
+                    borderColor: primaryColor,
+                    backgroundColor: primaryColorLight,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: primaryColor,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        padding: 10,
+                        backgroundColor: '#1a110b',
+                        titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
+                        bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+                        callbacks: {
+                            label: function(context) {
+                                return ` Ingresos: C$${context.raw.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                size: 11
+                            },
+                            color: '#6e5f55'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        grid: {
+                            borderDash: [5, 5],
+                            color: '#e9e4df'
+                        },
+                        ticks: {
+                            stepSize: 10,
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                size: 11
+                            },
+                            color: '#6e5f55',
+                            callback: function(value) {
+                                return 'C$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- GRÁFICO DE PRODUCTOS MÁS VENDIDOS ---
+        const productsCanvas = document.getElementById('productsChart');
+        if (productsCanvas) {
+            const productsCtx = productsCanvas.getContext('2d');
+            
+            // Paleta elegante café/amber/slate/forest
+            const chartColors = [
+                '#854d0e', // Café
+                '#d97706', // Ámbar
+                '#ca8a04', // Oro
+                '#15803d', // Verde
+                '#475569'  // Pizarra
+            ];
+            
+            const productsChart = new Chart(productsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ productos_mas_vendidos_labels | tojson }},
+                    datasets: [{
+                        data: {{ productos_mas_vendidos_valores | tojson }},
+                        backgroundColor: chartColors,
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 11
+                                },
+                                color: '#20130b',
+                                padding: 12,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            padding: 10,
+                            backgroundColor: '#1a110b',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Cantidad: ${context.raw} unidades`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

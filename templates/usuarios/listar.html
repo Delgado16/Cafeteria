@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block section_title %}Usuarios{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="user-cog" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Usuarios del Sistema</h2>
+            <a href="/admin/usuarios/crear" class="btn btn-primary btn-small">
+                <i data-lucide="user-plus"></i> Nuevo Usuario
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if usuarios %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo Electrónico</th>
+                        <th>Rol Administrativo</th>
+                        <th>Estado Cuenta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--text-dark);">{{ usuario.nombre }}</div>
+                        </td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            <span class="badge {% if usuario.rol == 'admin' %}badge-danger{% else %}badge-primary{% endif %}">
+                                <i data-lucide="{% if usuario.rol == 'admin' %}shield{% else %}user{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {{ usuario.rol }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if usuario.activo %}badge-success{% else %}badge-danger{% endif %}">
+                                <i data-lucide="{% if usuario.activo %}check{% else %}x{% endif %}" style="width: 12px; height: 12px; display: inline-block;"></i>
+                                {% if usuario.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if usuario.id != session.usuario_id %}
+                            <form action="/admin/usuarios/toggle/{{ usuario.id }}" method="POST" style="display: inline;" onsubmit="return confirm('¿Está seguro de cambiar el estado de este usuario?')">
+                                <button type="submit" class="btn btn-{{ 'danger' if usuario.activo else 'success' }} btn-small" title="{{ 'Desactivar' if usuario.activo else 'Activar' }}">
+                                    <i data-lucide="{{ 'slash' if usuario.activo else 'check-circle' }}"></i>
+                                    <span>{{ 'Desactivar' if usuario.activo else 'Activar' }}</span>
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted" style="font-size: 0.85rem; font-style: italic;"><i data-lucide="info" style="width: 14px; height: 14px; vertical-align: middle; display: inline-block;"></i> Es usted</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <i data-lucide="users" style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 1rem; display: inline-block;"></i>
+            <p class="text-muted">No hay usuarios registrados en el sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

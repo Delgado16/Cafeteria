@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Factura{% endblock %}
+
+{% block section_title %}Nueva Factura{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 style="font-size: 1.35rem; font-weight: 800;"><i data-lucide="file-plus" style="vertical-align: middle; margin-right: 0.5rem; width: 20px; height: 20px; color: var(--primary);"></i> Inicializar Nueva Factura</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <label for="cliente_id">Cliente Relacionado</label>
+                <select id="cliente_id" name="cliente_id" required autofocus>
+                    <option value="">-- Seleccione un cliente --</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}">{{ cliente.nombre }} ({{ cliente.cedula }})</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;"><i data-lucide="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Debe registrar al cliente antes de poder crear una factura.</small>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="tipo_venta">Tipo de Venta</label>
+                <select id="tipo_venta" name="tipo_venta" required>
+                    <option value="contado" selected>Contado</option>
+                    <option value="credito">Crédito</option>
+                </select>
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;"><i data-lucide="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Contado marcará la factura como pagada. Crédito creará una cuenta por cobrar.</small>
+            </div>
+
+            <div class="btn-group" style="justify-content: flex-end; margin-top: 1.5rem;">
+                <a href="/facturas" class="btn btn-secondary">
+                    <i data-lucide="x"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="arrow-right"></i> Crear Factura
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

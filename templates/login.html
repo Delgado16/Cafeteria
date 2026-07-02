@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Facturación Cafetería</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            --primary-h: 24;
+            --primary-s: 75%;
+            --primary-l: 25%;
+            --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+            --primary-hover: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 5%));
+            --primary-light: hsl(var(--primary-h), var(--primary-s), 96%);
+            --primary-glow: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.12);
+            --bg-dark: #120b07;
+            --bg-light: #fbfaf7;
+            --text-dark: #20130b;
+            --text-muted: #6e5f55;
+            --border: #e9e4df;
+            --radius: 12px;
+            --transition: all 0.25s ease;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #2f1d12 50%, #462c1b 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Decorative background element */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, hsla(var(--primary-h), var(--primary-s), 50%, 0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            z-index: 1;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: radial-gradient(circle, hsla(var(--primary-h), var(--primary-s), 40%, 0.12) 0%, transparent 75%);
+            bottom: -150px;
+            left: -150px;
+            z-index: 1;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem;
+            z-index: 10;
+            animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(133, 77, 14, 0.1);
+        }
+
+        .login-header h1 {
+            color: var(--text-dark);
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.35rem;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.85rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: white;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+
+        input:focus + i {
+            color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px var(--primary-glow);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(190, 18, 60, 0.15);
+            background-color: #fff1f2;
+            color: #be123c;
+            font-size: 0.85rem;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert i {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .demo-section {
+            background-color: var(--primary-light);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-top: 1.75rem;
+            border: 1px solid hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.06);
+        }
+
+        .demo-section h4 {
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .demo-section h4 i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .demo-credentials {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .demo-credentials:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(133, 77, 14, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .demo-credentials strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1.75rem;
+            }
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                ☕
+            </div>
+            <h1>Cafetería</h1>
+            <p>Sistema de Facturación</p>
+        </div>
+
+        {% if error %}
+            <div class="alert">
+                <i data-lucide="alert-circle"></i>
+                <div>{{ error }}</div>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <div class="input-wrapper">
+                    <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required autofocus>
+                    <i data-lucide="mail"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contrasena">Contraseña</label>
+                <div class="input-wrapper">
+                    <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" required>
+                    <i data-lucide="lock"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <span>Ingresar al Sistema</span>
+                <i data-lucide="log-in"></i>
+            </button>
+        </form>
+
+        <div class="demo-section">
+            <h4><i data-lucide="key"></i> Cuentas de Prueba</h4>
+            <div class="demo-grid">
+                <div class="demo-credentials" onclick="fillCredentials('admin@cafeteria.com', 'admin123')">
+                    <strong>Administrador</strong>
+                    Email: admin@cafeteria.com<br>
+                    Clave: admin123
+                </div>
+                <div class="demo-credentials" onclick="fillCredentials('vendedor@cafeteria.com', 'vendedor123')">
+                    <strong>Vendedor</strong>
+                    Email: vendedor@cafeteria.com<br>
+                    Clave: vendedor123
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lucide Icons Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        function fillCredentials(email, pass) {
+            document.getElementById('email').value = email;
+            document.getElementById('contrasena').value = pass;
+            // focus the submit button
+            document.querySelector('.btn-submit').focus();
+        }
+    </script>
+</body>
+</html>
