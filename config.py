@@ -14,6 +14,7 @@ class Config:
     MYSQL_DB = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DB', 'cafeteria_facturacion'))
     MYSQL_CURSORCLASS = 'DictCursor'
     
+    #Espero que funcione correctamente#
     # Sesión
     PERMANENT_SESSION_LIFETIME = 86400  # 24 horas
     SESSION_COOKIE_SECURE = False
