@@ -12,7 +12,7 @@ class Config:
     MYSQL_USER = os.getenv('MYSQLUSER', os.getenv('MYSQL_USER', 'root'))
     MYSQL_PASSWORD = os.getenv('MYSQLPASSWORD', os.getenv('MYSQL_PASSWORD', ''))
     MYSQL_DB = os.getenv('MYSQLDATABASE', os.getenv('MYSQL_DB', 'cafeteria_facturacion'))
-    MYSQL_PORT = int(os.getenv('MYSQLPORT', os.getenv('MYSQL_PORT', 3306)))
+    MYSQL_PORT = int(os.getenv('MYSQLPORT', os.getenv('MYSQL_PORT', 47519)))
     MYSQL_CURSORCLASS = 'DictCursor'
     
     #Espero que funcione correctamente#
