@@ -1,5 +1,5 @@
 from flask import Flask, session, redirect, url_for
-from flask_mysqldb import MySQL
+from db_pool import MySQLPool
 from config import Config
 from database import init_db
 import os
@@ -8,8 +8,8 @@ from datetime import timedelta
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Inicializar MySQL
-mysql = MySQL(app)
+# Inicializar MySQL con Pool de Conexiones
+mysql = MySQLPool(app)
 
 # Configuración de sesión
 app.permanent_session_lifetime = timedelta(hours=24)
