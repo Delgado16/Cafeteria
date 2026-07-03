@@ -6,6 +6,7 @@ def init_db():
     try:
         # Intentar conectar especificando la BD y el puerto (ideal para Railway)
         try:
+            print(f"INTENTANDO CONECTAR A MYSQL: host={Config.MYSQL_HOST}, port={Config.MYSQL_PORT}, user={Config.MYSQL_USER}, db={Config.MYSQL_DB}")
             conn = MySQLdb.connect(
                 host=Config.MYSQL_HOST,
                 user=Config.MYSQL_USER,
