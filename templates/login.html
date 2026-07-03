@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Facturación Cafetería</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -163,7 +166,7 @@
             box-shadow: 0 0 0 4px var(--primary-glow);
         }
 
-        input:focus + i {
+        input:focus+i {
             color: var(--primary);
         }
 
@@ -278,25 +281,39 @@
         }
 
         @keyframes cardAppear {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @media (max-width: 480px) {
             .login-container {
                 padding: 1.75rem;
             }
+
             .demo-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-header">
@@ -304,14 +321,14 @@
                 ☕
             </div>
             <h1>Cafetería</h1>
-            <p>Sistema de Facturación</p>
+            <p>Sistema de Facturación </p>
         </div>
 
         {% if error %}
-            <div class="alert">
-                <i data-lucide="alert-circle"></i>
-                <div>{{ error }}</div>
-            </div>
+        <div class="alert">
+            <i data-lucide="alert-circle"></i>
+            <div>{{ error }}</div>
+        </div>
         {% endif %}
 
         <form method="POST">
@@ -367,4 +384,5 @@
         }
     </script>
 </body>
+
 </html>
