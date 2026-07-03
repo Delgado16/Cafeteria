@@ -4,16 +4,30 @@ from config import Config
 def init_db():
     """Inicializa la base de datos con las tablas necesarias"""
     try:
-        conn = MySQLdb.connect(
-            host=Config.MYSQL_HOST,
-            user=Config.MYSQL_USER,
-            passwd=Config.MYSQL_PASSWORD
-        )
-        cursor = conn.cursor()
-        
-        # Crear base de datos si no existe
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {Config.MYSQL_DB}")
-        cursor.execute(f"USE {Config.MYSQL_DB}")
+        # Intentar conectar especificando la BD y el puerto (ideal para Railway)
+        try:
+            conn = MySQLdb.connect(
+                host=Config.MYSQL_HOST,
+                user=Config.MYSQL_USER,
+                passwd=Config.MYSQL_PASSWORD,
+                db=Config.MYSQL_DB,
+                port=Config.MYSQL_PORT
+            )
+            cursor = conn.cursor()
+        except MySQLdb.OperationalError as e:
+            # Si la BD no existe (Error 1049, suele pasar localmente la primera vez), crearla
+            if e.args[0] == 1049:
+                conn = MySQLdb.connect(
+                    host=Config.MYSQL_HOST,
+                    user=Config.MYSQL_USER,
+                    passwd=Config.MYSQL_PASSWORD,
+                    port=Config.MYSQL_PORT
+                )
+                cursor = conn.cursor()
+                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {Config.MYSQL_DB}")
+                cursor.execute(f"USE {Config.MYSQL_DB}")
+            else:
+                raise
         
         # Tabla: Usuarios (Admin y Vendedor)
         cursor.execute("""
